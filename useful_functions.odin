@@ -1035,4 +1035,34 @@ tuple_to_list :: proc(s: string) -> []int {
     }
 
     return result
+
+}
+
+// Determines whether a given integer `n` is a prime number.
+//
+// Parameters:
+//   - n: The integer to test for primality.
+//
+// Returns:
+//   - true if `n` is a prime number (i.e., greater than 1 and divisible only by 1 and itself).
+//   - false otherwise.
+//
+// Description:
+//   This function checks whether the input integer `n` is a prime number.
+//   It first rules out values less than 2, which are not prime by definition.
+//   Then, it iterates from 2 up to the square root of `n`, checking for any divisors.
+//   If any number in that range divides `n` evenly, the function returns false.
+//   Otherwise, it returns true, indicating that `n` is prime.
+//
+// Example:
+//   - is_prime(7) -> true
+//   - is_prime(10) -> false
+is_prime :: proc(n: int) -> bool {
+    if n < 2 { return false }
+    for val in 2 ..= int(sqrt(f64(n))) {
+        if n % val == 0 {
+            return false
+        }
+    }
+    return true
 }
