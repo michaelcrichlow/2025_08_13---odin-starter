@@ -1209,5 +1209,48 @@ is_vowel_u8 :: proc(r: u8) -> bool {
 }
 
 
+is_consonant :: proc {
+	is_consonant_rune,
+	is_consonant_u8,
+}
+
+
+/*
+Determines whether a given rune represents a consonant (any alphabetic character that is not a vowel).
+
+Inputs:
+- r: rune (The character to check)
+
+Returns:
+- result: bool (True if the rune is a consonant, False otherwise)
+
+Example:
+```
+	result_00 := is_consonant_rune('b') 
+	result_01 := is_consonant_rune('a') 
+	result_02 := is_consonant_rune('1')
+
+	fmt.println(result_00) // Output: true 
+	fmt.println(result_01) // Output: false 
+	fmt.println(result_02) // Output: false
+```
+Returns:
+```
+    true
+    false
+	false
+```
+*/
+is_consonant_rune :: proc(r: rune) -> bool {
+    _r := u8(r)
+    is_alpha := (_r >= 'A' && _r <= 'Z') || (_r >= 'a' && _r <= 'z')
+    return is_alpha && !is_vowel_rune(r)
+}
+
+is_consonant_u8 :: proc(r: u8) -> bool {
+    is_alpha := (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z')
+    return is_alpha && !is_vowel_u8(r)
+}
 
 // odinfmt: enable
+
