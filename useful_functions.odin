@@ -752,6 +752,53 @@ bin :: proc(n: int) -> string {
 }
 
 
+bin2 :: bin_negative_nums_as_twos_compliment
+
+
+bin_negative_nums_as_twos_compliment :: proc(n: int, bits: u8) -> (string, bool) #optional_ok {
+	if bits != 8 && bits != 16 && bits != 32 && bits != 64 {
+		print("bits:", bits, " --> must be 8, 16, 32 or 64")
+		return "", false
+	}
+	
+	// Calculate signed range
+    min_val := -(1 << (bits - 1))
+    max_val := (1 << (bits - 1)) - 1
+
+    // Check if number is within range
+    if n < min_val || n > max_val {
+        print(n, "does not fit into", bits, "bits (remember a bit has to be reserved for the sign).")
+		return "", false
+    }
+
+    // Convert to unsigned representation using two's complement
+    u := u128(n) & ((1 << bits) - 1)
+
+    // Build binary string with underscores every 4 bits
+    b: strings.Builder
+    strings.builder_init(&b, 0, int(bits + bits / 4), context.temp_allocator)
+
+    for i in 0 ..< bits {
+        bit := (u >> (bits - 1 - i)) & 1
+        if bit == 1 {
+            strings.write_string(&b, "1")
+        } else {
+            strings.write_string(&b, "0")
+        }
+
+        // Insert underscore after every 4 bits, except at the end
+        if (i + 1) % 4 == 0 && i + 1 < bits {
+            strings.write_string(&b, "_")
+        }
+    }
+
+    final_string := strings.to_string(b)
+    return final_string, true
+}
+
+
+
+
 //     .                                      .o o.   
 //   .o8                                     .8' `8.  
 // .o888oo oooo    ooo oo.ooooo.   .ooooo.  .8'   `8. 
@@ -891,6 +938,8 @@ two_strings_are_equal :: proc(s1, s2: string) -> bool {
     }
     return true
 }
+
+strings_compare :: two_strings_are_equal
 
 
 // Concatenates the various number of strings passed to it
