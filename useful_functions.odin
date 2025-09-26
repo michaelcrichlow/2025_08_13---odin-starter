@@ -9,6 +9,9 @@ import "core:math"
 import p_list "python_list_functions"
 import p_str "python_string_functions"
 
+len_runes  :: strings.rune_count
+// rune_slice :: strings.substring
+
 
 // copy_dynamic_array :: slice.clone_to_dynamic
 
@@ -755,7 +758,7 @@ bin :: proc(n: int) -> string {
 bin2 :: bin_negative_nums_as_twos_compliment
 
 
-bin_negative_nums_as_twos_compliment :: proc(n: int, bits: u8) -> (string, bool) #optional_ok {
+bin_negative_nums_as_twos_compliment :: proc(n: int, bits: u8, separate_bytes := false, use_underscores := true) -> (string, bool) #optional_ok {
 	if bits != 8 && bits != 16 && bits != 32 && bits != 64 {
 		print("bits:", bits, " --> must be 8, 16, 32 or 64")
 		return "", false
@@ -778,22 +781,32 @@ bin_negative_nums_as_twos_compliment :: proc(n: int, bits: u8) -> (string, bool)
     b: strings.Builder
     strings.builder_init(&b, 0, int(bits + bits / 4), context.temp_allocator)
 
-    for i in 0 ..< bits {
-        bit := (u >> (bits - 1 - i)) & 1
-        if bit == 1 {
-            strings.write_string(&b, "1")
-        } else {
-            strings.write_string(&b, "0")
-        }
+	for i in 0 ..< bits {
+		bit := (u >> (bits - 1 - i)) & 1
+		strings.write_string(&b, "1" if bit == 1 else "0")
 
-        // Insert underscore after every 4 bits, except at the end
-        if (i + 1) % 4 == 0 && i + 1 < bits {
-            strings.write_string(&b, "_")
-        }
-    }
+		// Insert underscore after every 4 bits, except at the end of a byte
+		if use_underscores {
+			if separate_bytes {
+				if (i + 1) % 4 == 0 && (i + 1) % 8 != 0 && i + 1 < bits  {
+					strings.write_string(&b, "_")
+				}
+			} else {
+				if (i + 1) % 4 == 0 && i + 1 < bits {
+					strings.write_string(&b, "_")
+				}
+			}
+		}
+		
+		// Insert 4 spaces after every full byte, except at the end
+		if separate_bytes && (i + 1) % 8 == 0 && i + 1 < bits {
+			strings.write_string(&b, "    ")
+		}
+	}
 
     final_string := strings.to_string(b)
-    return final_string, true
+    
+	return final_string, true
 }
 
 
@@ -1114,4 +1127,105 @@ is_prime :: proc(n: int) -> bool {
         }
     }
     return true
+}
+
+/*
+ * A generic procedure that mimics Python's id() function.
+ * It accepts a pointer to any value and returns its memory address.
+ *
+ * @param data: A pointer to any variable (`^$T`).
+ * @return: A `rawptr` representing the variable's memory address.
+ */
+id :: proc(data: ^$T) -> rawptr {
+	return rawptr(data)
+}
+
+
+/*
+ * A utility procedure that mimics Python-style string slicing using rune indices.
+ * It returns a substring of the input string from `rune_start` (inclusive) to `rune_end` (exclusive),
+ * based on rune positions rather than byte offsets, ensuring correct handling of UTF-8 encoded characters.
+ *
+ * Does not allocate memory. Returns a substring of the original string `s`.
+ *
+ * If `rune_end` is omitted, it defaults to `INT_MAX`, effectively slicing to the end of the string.
+ * If the indices are invalid (negative, out of bounds, or reversed), an empty string is returned.
+ *
+ * @param s: The input string to slice.
+ * @param rune_start: The starting rune index (inclusive).
+ * @param rune_end: The ending rune index (exclusive). Defaults to `INT_MAX`.
+ * @return: A substring of `s` spanning the specified rune range.
+ *
+ * +---------------------+-------------------------------+
+ * |      Python         |            Odin               |
+ * +---------------------+-------------------------------+
+ * | "hello"[2:5]        | rune_slice("hello", 2, 5)     |
+ * | "world"[0:3]        | rune_slice("world", 0, 3)     |
+ * | "héllö"[1:4]        | rune_slice("héllö", 1, 4)     |
+ * | "abc"[2:]           | rune_slice("abc", 2)          |
+ * | "小猫咪"[0:2]        | rune_slice("小猫咪", 0, 2)    |
+ * +---------------------+-------------------------------+
+ *
+ */
+rune_slice :: proc(s: string, rune_start: int, rune_end: int = INT_MAX) -> string {
+	if rune_start < 0 || rune_end < 0 || rune_end < rune_start {
+		return ""
+	}
+
+    N := len_runes(s)
+
+    _rune_start := rune_start
+    if _rune_start > N {
+        _rune_start = N
+    }
+
+    _rune_end := rune_end
+    if _rune_end > N {
+        _rune_end = N
+    }
+
+    if _rune_start == N && _rune_end == N { return "" }
+
+	return my_internal_substring(s, _rune_start, _rune_end)
+}
+
+@(private = "file")
+my_internal_substring :: proc(s: string, rune_start: int, rune_end: int) -> (sub: string) {
+	sub = s
+	ok  := true
+
+	rune_i := 0
+
+	if rune_start > 0 {
+		ok = false
+		for _, i in sub {
+			if rune_start == rune_i {
+				ok = true
+				sub = sub[i:]
+				break
+			}
+			rune_i += 1
+		}
+		if !ok { return "" }
+	}
+
+	if rune_end >= rune_start {
+		ok = false
+		for _, i in sub {
+			if rune_end == rune_i {
+				ok = true
+				sub = sub[:i]
+				break
+			}
+			rune_i += 1
+		}
+
+		if rune_end == rune_i {
+			ok = true
+		}
+
+        if !ok { return "" }
+	}
+
+	return sub
 }
