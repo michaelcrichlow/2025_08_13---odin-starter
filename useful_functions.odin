@@ -10,6 +10,7 @@ import p_list "python_list_functions"
 import p_str "python_string_functions"
 
 len_runes  :: strings.rune_count
+clear_slice :: slice.zero
 // rune_slice :: strings.substring
 
 
@@ -52,9 +53,13 @@ set_string :: proc(s: string) -> map[rune]struct {} {
 // o888o o888o o888o o888o o888o o888o ooooooooooo o888o   "888" `Y8bod8P' d888b    `Y888""8o  `Y8bod8P' o888o `Y8bod8P'  `8. .8'  
 //                                                                                                                         `" "'  
 
+min_iterable :: proc {
+	min_iterable_generic,
+	min_iterable_string_ascii,
+}
 
 // Given an iterable, it return the minimum value in it
-min_iterable :: proc(array: []$T) -> T {
+min_iterable_generic :: proc(array: []$T) -> T {
 	min := array[0]
 	for val in array {
 		if val < min {
@@ -64,8 +69,47 @@ min_iterable :: proc(array: []$T) -> T {
 	return min
 }
 
+/*
+ * Finds the minimum ASCII character (rune) in a given string.
+ * Each character in the string is compared by its Unicode code point value,
+ * and the character with the lowest value is returned.
+ * If the string is empty, the function will return rune(255).
+ *
+ * @param s: The input string consisting of ASCII characters.
+ * @return: The rune corresponding to the minimum character in the string.
+ *
+ * Note: Prefer the procedure group `min_iterable`.
+ *
+ * Example usage:
+ *
+ * min_iterable_string_ascii("apple") // returns 'a'
+ * Explanation: Among 'a', 'p', 'p', 'l', 'e', the lowest ASCII value is 'a' (97).
+ *
+ * min_iterable_string_ascii("!@987") // returns '!'
+ * Explanation: '!' = 33, '@' = 64, '9' = 57, '8' = 56, '7' = 55.
+ * The minimum code point is '!' (33).
+ *
+ * min_iterable_string_ascii("ABCxyz") // returns 'A'
+ * Explanation: 'A' = 65, 'B' = 66, 'C' = 67, 'x' = 120, 'y' = 121, 'z' = 122.
+ * The minimum code point is 'A' (65).
+ */
+min_iterable_string_ascii :: proc(s: string) -> rune {
+	_min := rune(255)
+	for val in s {
+		if val < _min {
+			_min = val
+		}
+	}
+	return _min
+}	
+
+max_iterable :: proc {
+	max_iterable_generic,
+	max_iterable_string_ascii,
+}
+
 // Given an iterable, it return the maximum value in it
-max_iterable :: proc(array: []$T) -> T {
+max_iterable_generic :: proc(array: []$T) -> T {
 	max := array[0]
 	for val in array {
 		if val > max {
@@ -75,6 +119,202 @@ max_iterable :: proc(array: []$T) -> T {
 	return max
 }
 
+/*
+ * Finds the maximum ASCII character (rune) in a given string.
+ * Each character in the string is compared by its Unicode code point value,
+ * and the character with the highest value is returned.
+ * If the string is empty, the function returns rune(0).
+ *
+ * @param s: The input string consisting of ASCII characters.
+ * @return: The rune corresponding to the maximum character in the string.
+ *
+ * Note: Prefer the procedure group `max_iterable`.
+ *
+ * Example usage:
+ *
+ * max_iterable_string_ascii("apple") // returns 'p'
+ * Explanation: Among 'a', 'p', 'p', 'l', 'e', the highest ASCII value is 'p'.
+ *
+ * max_iterable_string_ascii("!@987") // returns '@'
+ * Explanation: '!' = 33, '@' = 64, '9' = 57, '8' = 56, '7' = 55.
+ * The maximum code point is '@' (64).
+ *
+ * max_iterable_string_ascii("ABCxyz") // returns 'z'
+ * Explanation: 'A' = 65, 'B' = 66, 'C' = 67, 'x' = 120, 'y' = 121, 'z' = 122.
+ * The maximum code point is 'z' (122).
+ */
+max_iterable_string_ascii :: proc(s: string) -> rune {
+	_max := rune(0)
+	for val in s {
+		if val > _max {
+			_max = val
+		}
+	}
+	return _max
+}
+
+
+average_iterable :: proc{
+    average_iterable_int,
+	average_iterable_f64,
+}
+
+
+/*
+ * Computes the arithmetic mean of a slice of integers.
+ * Converts the total sum and length to f64 to ensure floating-point division.
+ * Returns 0.0 if the slice is empty to avoid division by zero.
+ *
+ * @param l: The slice of integers to average.
+ *
+ * @return: The average value as an f64. If the slice is empty, returns 0.0.
+ */
+average_iterable_int :: proc(l: []int) -> f64 {
+    if len(l) == 0 { return 0 }
+    
+    _total := f64(sum_iterable(l))
+
+    return _total / f64(len(l))
+}
+
+
+average_iterable_f64 :: proc(l: []f64) -> f64 {
+    if len(l) == 0 { return 0 }
+    
+    _total := sum_iterable(l)
+
+    return _total / f64(len(l))
+}
+
+
+map_min_value :: proc{
+    map_min_value_int,
+    map_min_value_f64,
+}
+
+map_max_value :: proc{
+    map_max_value_int,
+    map_max_value_f64,
+}
+
+map_min_and_max_values :: proc{
+    map_min_and_max_values_int,
+    map_min_and_max_values_f64,
+}
+
+map_min_value_int :: proc(m: map[$K]int) -> int {
+    if len(m) == 0 { return 0 }
+    
+	min := INT_MAX
+	for key, val in m {
+		if val < min {
+			min = val
+		}
+	}
+	return min
+}
+
+map_min_value_f64 :: proc(m: map[$K]f64) -> f64 {
+    if len(m) == 0 { return 0.0 }
+    
+	min := math.F64_MAX
+	for key, val in m {
+		if val < min {
+			min = val
+		}
+	}
+	return min
+}
+
+map_max_value_int :: proc(m: map[$K]int) -> int {
+    if len(m) == 0 { return 0 }
+    
+	max := INT_MIN
+	for key, val in m {
+		if val > max {
+			max = val
+		}
+	}
+	return max
+}
+
+map_max_value_f64 :: proc(m: map[$K]f64) -> f64 {
+    if len(m) == 0 { return 0.0 }
+    
+	max := math.F64_MIN
+	for key, val in m {
+		if val > max {
+			max = val
+		}
+	}
+	return max
+}
+
+map_min_and_max_values_int :: proc(m: map[$K]int) -> (int, int) {
+    if len(m) == 0 {
+        return 0, 0
+    }
+
+    min := INT_MAX
+    max := INT_MIN
+
+    for key, val in m {
+        if val < min {
+            min = val
+        }
+        if val > max {
+            max = val
+        }
+    }
+
+    return min, max
+}
+
+map_min_and_max_values_f64 :: proc(m: map[$K]f64) -> (f64, f64) {
+    if len(m) == 0 {
+        return 0.0, 0.0
+    }
+
+    min := math.F64_MAX
+    max := math.F64_MIN
+
+    for key, val in m {
+        if val < min {
+            min = val
+        }
+        if val > max {
+            max = val
+        }
+    }
+
+    return min, max
+}
+
+
+/*
+ * Counts how many times a specific value appears in a map.
+ *
+ * @param m: A map with arbitrary key type `$K` and value type `$V`.
+ * @param test_value: The value to compare against each entry in the map.
+ * @return: An integer representing how many times `test_value` appears in the map.
+ *
+ * Example usage:
+ *
+ * map_count(map[string]int{"a": 1, "b": 2, "c": 1}, 1) // returns 2
+ * Explanation: The value `1` appears for keys "a" and "c"
+ *
+ * map_count(map[string]int{"x": 5, "y": 6}, 3) // returns 0
+ * Explanation: The value `3` does not appear in the map
+ */
+map_count_value :: proc(m: map[$K]$V, test_value: V) -> int {
+    count := 0
+    for key, val in m {
+        if val == test_value {
+            count += 1
+        }
+    }
+    return count
+}
 
 //                                 .                   .o8    .o o.   
 //                               .o8                  "888   .8' `8.  
@@ -90,6 +330,7 @@ max_iterable :: proc(array: []$T) -> T {
 sorted :: proc {
 	sorted_string_to_dynamic_array,
 	sorted_slice_to_dynamic_array,
+	sorted_slice_of_slice_of_ints,
 }
 
 /*
@@ -196,6 +437,35 @@ sorted_slice_to_dynamic_array :: proc(l: []$T, reverse := false, allocator := co
 }
 
 
+/*
+sorted_slice_of_slice_of_ints creates a new, sorted slice from an existing
+slice of slices. It does not modify the original.
+
+Parameters:
+- l: The input slice of slices of integers.
+- index_used_to_sort: The index within each inner slice to use for comparison.
+- reverse: If true, sorts in descending order; otherwise, sorts in ascending order.
+- allocator: The memory allocator to use for creating the new slice. Defaults to
+  the temporary allocator, which is useful for short-lived results.
+*/
+sorted_slice_of_slice_of_ints :: proc(l: [][]int, reverse := false, allocator := context.temp_allocator) -> [][]int {
+	// 1. Create a copy of the original slice so we don't modify it.
+	// The new slice is created using the provided allocator.
+	result := slice.clone(l, allocator)
+
+	// 2. Sort the new slice using `slice.sort_by()` and `reverse`
+	// The [1] means it uses the second element to sort.
+    if reverse {
+        slice.sort_by(result[:], proc(a, b: []int) -> bool {return a[1] > b[1]})
+    }   else {
+        slice.sort_by(result[:], proc(a, b: []int) -> bool {return a[1] < b[1]})
+    }
+    
+	// 3. Return the newly allocated and sorted slice.
+	return result
+}
+
+
 //              .              .o o.   
 //            .o8             .8' `8.  
 //  .oooo.o .o888oo oooo d8b .8'   `8. 
@@ -286,7 +556,11 @@ str_rune_to_string :: proc(r: rune, allocator := context.temp_allocator) -> stri
 }
 
 
+/*
+Converets the passed slice of runes to a string
 
+- Allocates Using `context.temp_allocator`
+*/
 str_slice_of_runes_to_string :: proc(l: []rune, allocator := context.temp_allocator) -> string {
     b: strings.Builder
     strings.builder_init(&b, 0, len(l), allocator)
@@ -498,7 +772,9 @@ int_cast_float_to_int :: proc(f: f64) -> int {
 	return int(f)
 }
 
-float_cast :: proc {
+float_cast :: f64_cast
+
+f64_cast :: proc {
 	float_cast_string_to_f64,
 }
 
@@ -515,6 +791,7 @@ float_cast_string_to_f64 :: proc(s: string) -> (f64, bool) {
 //  888   888  o.  )88b   888 . `8.   .8' 
 // o888o o888o 8""888P'   "888"  `8. .8'  
 //                                `" "'   
+
 
 list :: proc {
 	list_string_to_list,
@@ -541,7 +818,7 @@ list_set_to_list :: proc(m: map[$T]struct {}, allocator := context.allocator) ->
 	return local_array
 }
 
-
+// keys and values are the same type
 dict_find_lowest_value_and_return_key :: proc(m: map[$T]T) -> T {
 	lowest_value: T
 	lowest_key: T
@@ -561,9 +838,51 @@ dict_find_lowest_value_and_return_key :: proc(m: map[$T]T) -> T {
 	return lowest_key
 }
 
+
+// keys and values are the same type
 dict_find_highest_value_and_return_key :: proc(m: map[$T]T) -> T {
 	highest_value: T
 	highest_key: T
+	first_pass := true
+	for key, value in m {
+		if first_pass {
+			highest_key = key
+			highest_value = value
+			first_pass = false
+		} else {
+			if value > highest_value {
+				highest_key = key
+				highest_value = value
+			}
+		}
+	}
+	return highest_key
+}
+
+// key and value are different types
+dict_find_lowest_value_and_return_key_02 :: proc(m: map[$K]$V) -> K {
+	lowest_value: T
+	lowest_key: K
+	first_pass := true
+	for key, value in m {
+		if first_pass {
+			lowest_key = key
+			lowest_value = value
+			first_pass = false
+		} else {
+			if value < lowest_value {
+				lowest_key = key
+				lowest_value = value
+			}
+		}
+	}
+	return lowest_key
+}
+
+// key and value are different types
+dict_find_highest_value_and_return_key_02 :: proc(m: map[$K]$V) -> K {
+	highest_value: V
+	highest_key: K
 	first_pass := true
 	for key, value in m {
 		if first_pass {
@@ -694,10 +1013,17 @@ pow :: math.pow
 //   - For exp = 0, the result is always 1 (even if base is 0).
 //
 // Example:
-//   int_pow(2, 3) -> 8
-//   int_pow(5, 0) -> 1
+//   - int_pow(2, 3) -> 8
+//   - int_pow(5, 0) -> 1
 int_pow :: proc(base: int, exp: int) -> int {
-    total := 1
+    if exp < 0 {
+		print("\n>>>>")
+        print("ERROR from `int_pow`: `exp` cannot be negative. Current value is:", exp)
+        print(">>>>\n")
+        panic("Negative `exp` detected.")
+	}
+	
+	total := 1
     for _ in 0 ..< exp {
         total *= base
     }
@@ -1121,7 +1447,7 @@ tuple_to_list :: proc(s: string) -> []int {
 //   - is_prime(10) -> false
 is_prime :: proc(n: int) -> bool {
     if n < 2 { return false }
-    for val in 2 ..= int(sqrt(f64(n))) {
+    for val in 2 ..< int(sqrt(f64(n)) + 1) {
         if n % val == 0 {
             return false
         }
@@ -1228,4 +1554,260 @@ my_internal_substring :: proc(s: string, rune_start: int, rune_end: int) -> (sub
 	}
 
 	return sub
+}
+
+
+/*
+ * Converts an integer value into its hexadecimal string representation.
+ * The result includes a "0x" prefix and uses uppercase hexadecimal digits ('A'–'F').
+ * Negative values are prefixed with a minus sign ("-0x...").
+ * Zero is handled as a special case and returns "0x0".
+ *
+ * Internally, the function works by repeatedly extracting 4-bit chunks (nibbles)
+ * from the unsigned representation of the input value, mapping each nibble to
+ * its corresponding hexadecimal digit, and then reversing the collected digits
+ * to produce the correct order.
+ *
+ * Allocates using `context.temp_allocator`.
+ *
+ * @param n: The integer to convert into a hexadecimal string.
+ * @return: A string containing the hexadecimal representation of the input integer.
+ *
+ * Example usage:
+ *
+ * hex(10)        // returns "0xA"
+ * Explanation: decimal 10 is hexadecimal A.
+ *
+ * hex(255)       // returns "0xFF"
+ * Explanation: decimal 255 is hexadecimal FF.
+ *
+ * hex(1114111)   // returns "0x10FFFF"
+ * Explanation: decimal 1114111 is hexadecimal 10FFFF.
+ *
+ * hex(-4096)     // returns "-0x1000"
+ * Explanation: negative values are prefixed with "-".
+ *
+ * hex(0)         // returns "0x0"
+ * Explanation: zero is a special case.
+ */
+hex :: proc(n: int) -> string {
+    a := context.temp_allocator
+
+    // Special case for zero
+    if n == 0 {
+        return "0x0"
+    }
+
+    // Handle sign
+    negative := n < 0
+    value := n
+    if negative {
+        value = -value
+    }
+
+    // Work in unsigned to simplify bit ops
+    u := cast(u64)(value)
+
+    // Lowercase hex digits
+    digits := [16]u8 {
+        '0','1','2','3','4','5','6','7',
+        '8','9','A','B','C','D','E','F',
+    }
+
+    // Build result using temp allocator
+    // Worst-case length: "-" + "0x" + up to 16 hex digits for 64-bit
+    // 16 hex digits + 1 '-' if negative + 1 '0' + 1 'x' (for the beginning) --> 16 + 1 + 1 + 1 --> 19
+    buf := make([dynamic]u8, 0, 19, a)      // that's why the capity is 19 here
+    if negative {
+        append(&buf, '-')
+    }
+        append(&buf, '0', 'x')
+
+    // Collect hex digits in reverse
+    tmp := make([dynamic]u8, 0, 16, a)
+    for (u > 0) {
+        d := cast(int)(u & 0xF)
+        append(&tmp, digits[d])
+        u >>= 4
+    }
+
+    // Append reversed to get correct order
+    for i := len(tmp) - 1; i >= 0; i -= 1 {
+        append(&buf, tmp[i])
+    }
+
+    return string(buf[:])
+}
+
+
+/*
+ * Converts a single Unicode character (rune) into its integer code point.
+ * This mimics Python's `ord()` function, returning the numeric value
+ * associated with the given character. `ord` is short for `ordinal`
+ *
+ * @param r: The input rune (Unicode character).
+ * @return: The integer code point corresponding to the rune.
+ *
+ * Example usage:
+ *
+ * ord('A') // returns 65
+ * Explanation: 'A' has Unicode code point U+0041, which is 65 in decimal.
+ *
+ * ord('😀') // returns 128512
+ * Explanation: '😀' has Unicode code point U+1F600, which is 128512 in decimal.
+ */
+ord :: proc(r: rune) -> int {
+    return int(r)
+}
+
+
+/*
+ * Converts an integer code point into its corresponding Unicode character (rune).
+ * This mimics Python's `chr()` function, returning the character associated
+ * with the given numeric value.
+ *
+ * @param n: The integer code point to convert.
+ * @return: The rune (Unicode character) corresponding to the code point.
+ *
+ * Example usage:
+ *
+ * chr(65) // returns 'A'
+ * Explanation: Unicode code point 65 corresponds to the character 'A'.
+ *
+ * chr(128512) // returns '😀'
+ * Explanation: Unicode code point 128512 corresponds to the emoji '😀'.
+ *
+ * Notes on invalid inputs:
+ * - Passing a negative integer or a value greater than the maximum valid Unicode code point (U+10FFFF)
+ *   will still produce a rune in Odin, but it may not correspond to a valid character.
+ * - Such values can render as replacement glyphs (�) or appear as undefined symbols depending on the font
+ *   and terminal environment.
+ * - It is recommended to validate inputs before calling `chr` if you need guaranteed valid Unicode output.
+ */
+chr :: proc(n: int) -> rune {
+    return rune(n)
+}
+
+
+/*
+ * Computes the n‑th Fibonacci number using Binet's formula.
+ * The Fibonacci sequence is defined as F(0) = 0, F(1) = 1, and
+ * F(n) = F(n‑1) + F(n‑2) for n > 1. This implementation uses
+ * the closed‑form expression involving powers of (1 ± √5)/2,
+ * avoiding iterative loops or recursion.
+ *
+ * Internally, the function calculates:
+ *   F(n) = ( ( (1 + √5)^n ) - ( (1 - √5)^n ) ) / ( 2^n * √5 )
+ * and casts the result to an integer.
+ *
+ * @param n: The index of the Fibonacci number to compute (n ≥ 0).
+ * @return: The n‑th Fibonacci number as an integer.
+ *
+ * Example usage:
+ *
+ * nth_fibonacci_number(0) // returns 0
+ * Explanation: Base case of the sequence.
+ *
+ * nth_fibonacci_number(1) // returns 1
+ * Explanation: Base case of the sequence.
+ *
+ * nth_fibonacci_number(10) // returns 55
+ * Explanation: The 10th Fibonacci number is 55.
+ */
+nth_fibonacci_number :: proc(n: int) -> int {
+    f5 := f64(5)
+    sqrt_of_5 := math.sqrt(f5)
+    return int_cast((pow(1.0 + sqrt_of_5, f64(n)) - pow(1.0 - sqrt_of_5, f64(n))) / (pow(2.0, f64(n)) * sqrt_of_5))
+}
+
+/*
+ * Produces a new string by selecting characters from the input string according to
+ * start, stop, and step parameters. Negative indices are translated relative to the
+ * end of the string (e.g. -1 refers to the last character, -2 to the second-to-last
+ * character and so on). `start_` is included and `stop_` is not. i.e.: (start_, stop_]. 
+ * Think "Up to, but not including, the `stop_` index."
+ *
+ * Returns an empty string if the computed range yields no characters.
+ *
+ * Allocates using `context.temp_allocator`
+ *
+ * @param s:       The input string to slice.
+ * @param start_:  The starting index (default 0). Negative values count from the end.
+ * @param stop_:   The stopping index (default INT_MAX, treated as the string length).
+ *                 Negative values count from the end.
+ * @param step_:   The step size (default 1). Must not be zero. Positive values iterate
+ *                 forward, negative values iterate backward.
+ * @param allocator: The allocator used to build the new string.
+ *
+ * @return: A newly allocated string containing the selected characters.
+ *
+ * Example usage:
+ *
+ * string_slice("Hello, World!", 0, 5, 1) // returns "Hello"
+ * Explanation: Characters from index 0 up to (but not including) 5.
+ *
+ * string_slice("Hello, World!", -6, INT_MAX, 1) // returns "World!"
+ * Explanation: Start at index -6 (translated to 7) through the end.
+ *
+ * string_slice("Hello, World!", 0, INT_MAX, 2) // returns "Hlo ol!"
+ * Explanation: Every second character from start to end.
+ *
+ * string_slice("Hello, World!", 0, INT_MAX, -1) // returns "!dlroW ,olleH"
+ * Explanation: Reverse the entire string.
+ *
+ * string_slice("Hello, World!", step_=-1) // returns "!dlroW ,olleH"
+ * Explanation: If you omit the `start_` and `stop_` parameters, they default to 
+ *              the beginning and end of the string, respectively. Here, just `step_`
+ *              is used. Just like the example above, it reverses the entire string.              
+ *
+ * string_slice("abcdef", 2, 5, 1) // returns "cde"
+ * Explanation: Characters at indices 2, 3 and 4.
+ *
+ * string_slice("abcdef", -4, INT_MAX, 1) // returns "cdef"
+ * Explanation: Characters from index -4 (translated to 2) to the end of the string is "cdef".
+ *
+ * string_slice("abcdef", -4, INT_MAX, -1) // returns "fedc"
+ * Explanation: Characters from index -4 (translated to 2) to the end of the string -- reversed -- is "fedc".
+ */
+string_slice :: proc(s: string, start_ := 0, stop_ := INT_MAX, step_ := 1, allocator := context.temp_allocator) -> string {
+    n := len(s)
+    _start := start_
+    _stop  := stop_
+
+    // Translate negative indices like Python
+    if _start < 0 {
+        _start += n
+    }
+    if _stop == INT_MAX { // default "no stop" means end
+        _stop = n
+    } else if _stop < 0 {
+        _stop += n
+    }
+
+    // Clamp to bounds
+    _start = clamp(_start, 0, n)
+    _stop  = clamp(_stop,  0, n)
+
+    // make sure `step_` is not zero
+    if step_ == 0 {
+        panic("step cannot be zero")
+    }
+
+
+    // make a string builder to fill with the correct characters
+    b: strings.Builder
+    strings.builder_init(&b, 0, len(s), allocator)
+
+    if step_ > 0 {
+        for i := _start; i < _stop; i += step_ {
+            strings.write_rune(&b, rune(s[i]))
+        }
+    } else {
+        for i := _stop - 1; i > _start - 1; i += step_ {
+            strings.write_rune(&b, rune(s[i]))
+        }
+    }
+    final_string := strings.to_string(b)
+    
+    return final_string
 }
